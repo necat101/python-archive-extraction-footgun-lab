@@ -1,0 +1,169 @@
+Title: Zip Slip Vulnerability
+URL: https://snyk.io/research/zip-slip-vulnerability
+ID: 17237295
+
+[17238238] by tptacek:
+  What? You don&#x27;t get to name this vulnerability. It&#x27;s one of the oldest in the appsec book.This is a little bit like trying to brand file upload vulnerabilities that put ..&#x27;s in the path name in multipart MIME headers. Wait until they find out about NUL bytes!
+
+  [17238478] by LunaSea:
+    Yeah Snyk is pretty well known for bullshit self promotion and terrible articles. I avoid their tool with a passion due to this.
+
+    [17239082] by throwaway111143:
+      Could you share more about their tool?
+
+  [17242775] by ptoomey3:
+    Ha..indeed. We wrote something up about it in 2009: https:&#x2F;&#x2F;labs.neohapsis.com&#x2F;2009&#x2F;04&#x2F;21&#x2F;directory-traversal-in.... But even in that post we note that it was a relatively well known issue.
+
+  [17240773] by oh_sigh:
+    From the first paragraph:&gt; Of course, this type of vulnerability has existed before, but recently it has manifested itself in a much larger number of projects and libraries.They&#x27;ve responsibly notified and helped a number of projects fix this issue[1]. It seems they are being nothing but a good citizen here.[1] https:&#x2F;&#x2F;github.com&#x2F;snyk&#x2F;zip-slip-vulnerability
+
+    [17240845] by tptacek:
+      Every appsec tester looks for these vulnerabilities and routinely finds them. I&#x27;m not criticizing them for testing for it; of course they should do that. I&#x27;m saying: under no circumstances should they be allowed to brand this vulnerability. It&#x27;s not &quot;Zip Slip&quot;. It&#x27;s &quot;ZIP file directory traversal&quot;.
+
+      [17240896] by ?:
+
+  [17244882] by Fnoord:
+    Yup, this is nothing new. I read a guide on this, and made a PoC tar trojan using this technique back in the &#x27;90s.
+
+[17237602] by jaxbot:
+  I&#x27;m pretty sure this has been known for a long time. This was the method used to jailbreak some Windows Phones back in the day -- extract an archive that overwrites carrier OMA files. Iirc you could just rename a folder in 7-zip to &quot;..&#x2F;..&#x2F;foo&quot; and it would work. No special tools required.
+
+  [17237897] by jwilk:
+    This class of vulnerabilites (directory traversal in an unarchiver) has been known at least since 2001:https:&#x2F;&#x2F;nvd.nist.gov&#x2F;vuln&#x2F;detail&#x2F;CVE-2001-1268 (Info-ZIP unzip)https:&#x2F;&#x2F;nvd.nist.gov&#x2F;vuln&#x2F;detail&#x2F;CVE-2001-1270 (PKZip)https:&#x2F;&#x2F;nvd.nist.gov&#x2F;vuln&#x2F;detail&#x2F;CVE-2001-1271 (rar)
+
+  [17237674] by masklinn:
+    &gt; I&#x27;m pretty sure this has been known for a long time.It has, but that so many libraries are still vulnerable by default means it hasn&#x27;t exactly stuck.
+
+[17239020] by tlb:
+  Their validation for Node isn&#x27;t quite correct. They suggest:  var filePath = path.join(targetFolder, entry.path);
+    if (filePath.indexOf(targetFolder) != 0) {
+      return;
+    }
+  
+  But if targetFolder=&quot;&#x2F;var&#x2F;foo&quot;, then you can deposit files in &quot;&#x2F;var&#x2F;foo.secret&quot; by providing a path &quot;..&#x2F;foo.secret&#x2F;blub&quot;
+
+[17240481] by diamondo25:
+  This exploit has been found and exploited before (in 2015!) to get root on Samsung devices that ran SwiftKey, that automatically updated on boot as root user through downloading a ZIP from an insecure (HTTP) URL...See https:&#x2F;&#x2F;www.cvedetails.com&#x2F;cve&#x2F;CVE-2015-4641&#x2F;
+
+[17237667] by jwilk:
+  If you want to test your favorite unarchiver, but you&#x27;re too lazy to craft archives by hand:https:&#x2F;&#x2F;github.com&#x2F;jwilk&#x2F;path-traversal-samples
+
+[17237878] by benmmurphy:
+  i&#x27;m surprised they need to be handcrafted. the zip that ships with OSX will let you create such &#x27;bad&#x27; archives. tar will also let you create &#x27;bad&#x27; archives. and interestingly enough tar on OSX will barf if you try to extract any of these &#x27;bad&#x27; archives. also, there is another trick you can do with tar archives which is not possible for zip archives which is embed a symlink into the archive that points outside the archive and trick the tar program into following the symlink. the tar that ships with OSX will barf on this (even if it wasn&#x27;t responsible for creating the symlink) but i know on other platforms tar will happily extract through symlinks. i know because there was one PaaS platform where you could extract though symlinks to break out of their sandbox. also, zip will extract through symlinks because it doesn&#x27;t really understand symlinks. EDIT: (zip understands symlinks. the default OSX version will defer making the symlinks until other files are unzipped which fixes symlinks being used from escaping)    &gt; zip my.zip ..&#x2F;foo.txt
+        adding: ..&#x2F;foo.txt (stored 0%)
+  
+      &gt; unzip -l my.zip
+      Archive:  my.zip
+        Length      Date    Time    Name
+      ---------  ---------- -----   ----
+              4  06-05-2018 15:08   ..&#x2F;foo.txt
+      ---------                     -------
+              4                     1 file
+  
+      &gt; unzip my.zip
+      Archive:  my.zip
+      warning:  skipped &quot;..&#x2F;&quot; path component(s) in ..&#x2F;foo.txt
+       extracting: foo.txt
+  
+      &gt; zip my.zip outside&#x2F;foo.txt
+        adding: outside&#x2F;foo.txt (stored 0%)
+      &gt; rm outside&#x2F;foo.txt
+      &gt; unzip my.zip
+      Archive:  my.zip
+       extracting: outside&#x2F;foo.txt
+      &gt; cat ..&#x2F;foo.txt
+      foo
+  
+      &gt; tar cvf my_tar ..&#x2F;foo.txt
+      a ..&#x2F;foo.txt
+  
+      &gt; tar tvf my_tar.tar
+      -rw-r--r--  0 benmurphy wheel       4  5 Jun 15:00 ..&#x2F;foo.txt
+  
+      &gt; tar xvf my_tar.tar
+      x ..&#x2F;foo.txt: Path contains &#x27;..&#x27;
+      tar: Error exit delayed from previous errors.
+  
+      &gt; ln -s ..&#x2F; outside
+      &gt; tar cvf my_tar.tar outside outside&#x2F;foo.txt
+      a outside
+      a outside&#x2F;foo.txt
+  
+      &gt; tar tvf my_tar.tar
+      lrwxr-xr-x  0 benmurphy wheel       0  5 Jun 15:01 outside -&gt; ..&#x2F;
+      -rw-r--r--  0 benmurphy wheel       4  5 Jun 15:02 outside&#x2F;foo.txt
+  
+      &gt; tar xvf my_tar.tar
+      x outside
+      x outside&#x2F;foo.txt: Cannot extract through symlink outside&#x2F;foo.txt
+      tar: Error exit delayed from previous errors.
+
+[17237582] by 13of40:
+  &gt;The contents of this zip file have to be hand crafted.I think you used to be able to do it on an Amiga using the official LHA(?) compression program, due to the Amiga using front slashes as delimiters.But beyond that, I really wish there was a zip library that let you do all of the nuanced things the format allows.  For example, each file in an archive has its own encryption header, so you could create an archive where the first 10 files were clear text but the 11th was encrypted...
+
+  [17237645] by masklinn:
+    &gt; But beyond that, I really wish there was a zip library that let you do all of the nuanced things the format allows. For example, each file in an archive has its own encryption header, so you could create an archive where the first 10 files were clear text but the 11th was encrypted…edit: ignore comment, misread encryption as compression. Leaving it for posterity.That seems pretty straightforward given it&#x27;s necessary to generate &quot;best practice&quot; OCF. Python&#x27;s stdlib module certainly allows it (ZipFile.write takes an optional compress_type parameter which overrides the one set in the constructor, just &quot;zf.write(fname, compress_type=zipfile.ZIP_STORED)&quot;
+
+    [17237795] by 13of40:
+      The encryption is a separate step done on top of the compressed data.
+
+      [17238126] by masklinn:
+        Oh yes I misread encryption as compression, sorry.
+
+[17244488] by evilDagmar:
+  This is up there with buffer overflow bugs (is counting really that hard?) for things we bitch about all the time, yet somehow developers manage to ignore it.This type of screwup goes all the way back to DOS days and beyond with similar stunts being attempted with unix tar.While we&#x27;re at it, let&#x27;s repackage people using terrible passwords as a newly discovered widespread problem.This situation has never shown signs of improvement.
+
+[17237616] by nathanaldensr:
+  According to their list of known-vulnerable libraries[1], the actual Microsoft-supplied library, System.IO.Compression.ZipFile, either isn&#x27;t vulnerable or hasn&#x27;t been tested; only third-party NuGet-based libraries are.[1]: https:&#x2F;&#x2F;github.com&#x2F;snyk&#x2F;zip-slip-vulnerability
+
+[17237613] by ?:
+
+[17240266] by zokier:
+  Can someone give an example of valid usecase for having `..` at all in a ZIP file?
+
+  [17242440] by jschwartzi:
+    I would imagine it has less to do with valid use cases and more to do with avoiding special cases and path name validation in your archiver. Surely if you&#x27;re concerned about filesystem integrity when extracting untrusted archives you&#x27;re extracting into a chroot jail or similar. Or you&#x27;re using facilities of the archiver to list the files that would be extracted and validating the list before running the archiver.
+
+[17238562] by ComputerGuru:
+  Wow, a code name and a logo for behavior that is basically by design?
+
+[17237664] by dpedu:
+  I&#x27;ve seen this in tar - isn&#x27;t it a feature?
+
+  [17240665] by the8472:
+    In tar it definitely is because you can have symlinks using relative paths. So if your directory tree contains symlinks, you tar it with all bells and whistles (attributes, symlinks, ownership) and unpack it somewhere else it won&#x27;t be a lossy transfer.
+
+  [17238105] by wang_li:
+    Not a good feature. Figuring out the rules that would allow the use of .. in a path name in a safe way seems a lot more difficult than figuring out why you want to put .. into your archive and changing what you are doing to avoid it.
+
+[17237530] by ?:
+
+[17237642] by jwilk:
+  &gt; In fact, Python libraries were vulnerable until fixed in 2014.This is incorrect. Python&#x27;s tarfile and zipfile (and shutil) modules have no protection against directory traversal.
+
+  [17237665] by masklinn:
+    https:&#x2F;&#x2F;docs.python.org&#x2F;3&#x2F;library&#x2F;zipfile.html?highlight=zip...&gt;  If a member filename is an absolute path, a drive&#x2F;UNC sharepoint and leading (back)slashes will be stripped, e.g.: &#x2F;&#x2F;&#x2F;foo&#x2F;bar becomes foo&#x2F;bar on Unix, and C:\foo\bar becomes foo\bar on Windows. And all &quot;..&quot; components in a member filename will be removed, e.g.: ..&#x2F;..&#x2F;foo..&#x2F;..&#x2F;ba..r becomes foo..&#x2F;ba..r. On Windows illegal characters (:, &lt;, &gt;, |, &quot;, ?, and *) replaced by underscore (_).Sure reads like directory traversal mitigation.
+
+    [17237866] by bjpbakker:
+      It does. However, in your linked document just below the `extract` function there is `extractall` that actually has a warning that it does &#x2F;not&#x2F; mitigate directory traversal.While by itself this might be a deliberate design choice, it vows for an easy mistake.I&#x27;m a fan of telling that a function is unsafe (by design) by its name. So `unsafeExtractall` or something like it. That should give a clear warning to investigate unless you know what you&#x27;re doing.
+
+      [17237947] by ishi:
+        `extractall` does mitigate directory traversal. Looking at the source code, both `extract` and `extractall` call `_extract_member` which sanitizes the file paths.See https:&#x2F;&#x2F;github.com&#x2F;python&#x2F;cpython&#x2F;blob&#x2F;3.6&#x2F;Lib&#x2F;zipfile.py
+
+        [17238028] by bjpbakker:
+          Good catch. Seems like the docs warn too much on this then, but good to see that it&#x27;s not a problem in Python.
+
+          [17238060] by ?:
+
+      [17238124] by masklinn:
+        &gt; It does. However, in your linked document just below the `extract` function there is `extractall` that actually has a warning that it does &#x2F;not&#x2F; mitigate directory traversal.You&#x27;re misreading the warning. It&#x27;s saying that the module attempts to mitigate the issue (referring back to ZipFile.extract) but pointing out that this may not be entirely reliable, and thus that as the library user you really should inspect&#x2F;validate archive paths before doing an on-disk extraction.
+
+      [17238074] by irishsultan:
+        The warning says that it attempts to mitigate it (with a referral to the documentation of the extract function). It&#x27;s of course a bit strange that in one case it&#x27;s a note that explains how the mitigation works, and in the other case it&#x27;s a warning to not blindly trust foreign zips, but it seems clear to me that either both are affected, or neither of them is.
+
+        [17240396] by wstuartcl:
+          Documentation,  the other &quot;hard&quot; task in CS.
+
+    [17238117] by jwilk:
+      I stand corrected. I was mislead by the scary warning, which is still there.The tarfile module is still vulnerable:https:&#x2F;&#x2F;bugs.python.org&#x2F;issue17102
+

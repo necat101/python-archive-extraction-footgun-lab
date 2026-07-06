@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+output/
+*.tmp
+/tmp/
+.DS_Store
+archive_lab_*
