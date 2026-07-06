@@ -5,8 +5,8 @@ This file records a clean end-to-end verification of the lab from a fresh git cl
 ## Verification transcript
 
 ```
-$ git clone https://github.com/necat101/python-archive-extraction-footgun-lab.git verify-clone2
-Cloning into 'verify-clone2'...
+$ git clone https://github.com/necat101/python-archive-extraction-footgun-lab.git verify-final
+Cloning into 'verify-final'...
 
 $ python3 -m py_compile generate_cases.py run_lab.py
 OK
@@ -16,7 +16,7 @@ Wrote 50 cases to cases.json
 
 $ python3 run_lab.py
 Done. pass=530 fail=40 skip=180
-Results written to RESULTS.md, output/results_rows.csv, output/results_rows.json
+Results written to RESULTS.md, results_rows.csv, results_rows.json
 ```
 
 ## Checks
@@ -31,8 +31,8 @@ Results written to RESULTS.md, output/results_rows.csv, output/results_rows.json
 - Package manager: none
 - External packages: none – Python stdlib only
 - Files written outside repo: none
-- output/results_rows.csv: generated
-- output/results_rows.json: generated
+- results_rows.csv: generated at repo root
+- results_rows.json: generated at repo root
 - RESULTS.md: generated
 
 ## Environment
