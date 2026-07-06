@@ -9,7 +9,7 @@ Python archive extraction footgun lab – correctness results
 - Cases: 50
 - Methods: 15
 - Total rows: 750
-- Elapsed: 0.187s
+- Elapsed: 0.269s
 - tracemalloc current: 430.1 KiB, peak: 431.1 KiB
 
 Commands:
@@ -57,7 +57,7 @@ Collision context hits: 75
 - Package manager used: none
 - Real archive input: none – synthetic fake member names only
 - Shell unzip/tar: none
-- Dangerous extraction: none – dry_run / validation only, safe extraction only into controlled temp dir /tmp/archive_lab_ccuzu_v_
+- Dangerous extraction: none – dry_run / validation only, safe extraction only into controlled temp dir /tmp/archive_lab_z5a2jd6a
 - Symlink following: not_run – context_only
 - Compression bomb test: not_tested
 - Production sandbox: not_tested
@@ -66,8 +66,8 @@ Collision context hits: 75
 ## Artifacts
 
 - cases.json – 50 deterministic cases
-- output/results_rows.csv
-- output/results_rows.json
+- results_rows.csv
+- results_rows.json
 
 ## Conclusion
 

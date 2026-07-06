@@ -74,7 +74,7 @@ python3 generate_cases.py
 python3 run_lab.py
 ```
 
-Results: `RESULTS.md`, `output/results_rows.csv`, `output/results_rows.json`
+Results: `RESULTS.md`, `results_rows.csv`, `results_rows.json`
 
 ## Results (summary)
 

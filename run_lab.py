@@ -386,10 +386,10 @@ current, peak = tracemalloc.get_traced_memory()
 tracemalloc.stop()
 
 # write results
-with open(os.path.join(output_dir, "results_rows.json"), "w") as f:
+with open("results_rows.json", "w") as f:
     json.dump(rows, f, indent=2)
 
-with open(os.path.join(output_dir, "results_rows.csv"), "w", newline="") as f:
+with open("results_rows.csv", "w", newline="") as f:
     if rows:
         w = csv.DictWriter(f, fieldnames=rows[0].keys())
         w.writeheader()
@@ -471,8 +471,8 @@ results_md += f"""
 ## Artifacts
 
 - cases.json – {len(cases)} deterministic cases
-- output/results_rows.csv
-- output/results_rows.json
+- results_rows.csv
+- results_rows.json
 
 ## Conclusion
 
@@ -489,4 +489,4 @@ with open("RESULTS.md", "w") as f:
     f.write(results_md)
 
 print(f"Done. pass={status_counts['pass']} fail={status_counts['fail']} skip={status_counts['skip']}")
-print(f"Results written to RESULTS.md, output/results_rows.csv, output/results_rows.json")
+print(f"Results written to RESULTS.md, results_rows.csv, results_rows.json")
